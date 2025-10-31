@@ -114,13 +114,14 @@ async def db_session_stats():
 from app.api import (
     projects, outlines, characters, chapters,
     wizard_stream, relationships, organizations,
-    auth, users
+    auth, users, data_export, api_configs
 )
 from app.api import settings as settings_router  # 使用别名避免与配置对象冲突
 
 app.include_router(auth.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
 app.include_router(settings_router.router, prefix="/api")  # 使用别名
+app.include_router(api_configs.router, prefix="/api")
 
 app.include_router(projects.router, prefix="/api")
 app.include_router(wizard_stream.router, prefix="/api")
@@ -129,6 +130,7 @@ app.include_router(characters.router, prefix="/api")
 app.include_router(chapters.router, prefix="/api")
 app.include_router(relationships.router, prefix="/api")
 app.include_router(organizations.router, prefix="/api")
+app.include_router(data_export.router, prefix="/api")
 
 static_dir = Path(__file__).parent.parent / "static"
 if static_dir.exists():

@@ -11,6 +11,7 @@ import Relationships from './pages/Relationships';
 import Organizations from './pages/Organizations';
 import Chapters from './pages/Chapters';
 import Settings from './pages/Settings';
+import DataManagement from './pages/DataManagement';
 // import Polish from './pages/Polish';
 import Login from './pages/Login';
 import AuthCallback from './pages/AuthCallback';
@@ -33,6 +34,7 @@ function App() {
           <Route path="/" element={<ProtectedRoute><ProjectList /></ProtectedRoute>} />
           <Route path="/wizard" element={<ProtectedRoute><ProjectWizardNew /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+          <Route path="/data-management" element={<ProtectedRoute><DataManagement /></ProtectedRoute>} />
           <Route path="/project/:projectId" element={<ProtectedRoute><ProjectDetail /></ProtectedRoute>}>
             <Route index element={<Navigate to="world-setting" replace />} />
             <Route path="world-setting" element={<WorldSetting />} />

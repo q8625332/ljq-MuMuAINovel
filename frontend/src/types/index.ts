@@ -36,6 +36,42 @@ export interface SettingsUpdate {
   preferences?: string;
 }
 
+// API配置管理类型定义
+export interface ApiConfig {
+  id: string;
+  user_id: string;
+  name: string;
+  api_provider: string;
+  api_key: string;
+  api_base_url: string;
+  model_name: string;
+  temperature: number;
+  max_tokens: number;
+  is_default: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ApiConfigCreate {
+  name: string;
+  api_provider: string;
+  api_key: string;
+  api_base_url: string;
+  model_name: string;
+  temperature?: number;
+  max_tokens?: number;
+}
+
+export interface ApiConfigUpdate {
+  name?: string;
+  api_provider?: string;
+  api_key?: string;
+  api_base_url?: string;
+  model_name?: string;
+  temperature?: number;
+  max_tokens?: number;
+}
+
 // LinuxDO 授权 URL 响应
 export interface AuthUrlResponse {
   auth_url: string;

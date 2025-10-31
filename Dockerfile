@@ -43,7 +43,11 @@ COPY backend/requirements.txt ./
 # 安装Python依赖
 RUN pip install --no-cache-dir -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
 
-# 复制后端代码
+# 强制不使用缓存：添加时间戳作为构建参数
+ARG BUILD_DATE
+ARG CACHEBUST=1.0.0
+
+# 复制后端代码（确保获取最新版本）
 COPY backend/ ./
 
 # 从前端构建阶段复制构建好的静态文件

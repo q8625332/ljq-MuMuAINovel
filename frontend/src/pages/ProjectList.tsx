@@ -189,7 +189,7 @@ export default function ProjectList() {
                   e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)';
                 }}
               >
-                API设置
+                设置
               </Button>
               <UserMenu />
             </Col>

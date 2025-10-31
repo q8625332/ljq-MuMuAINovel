@@ -17,7 +17,8 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       try {
         await authApi.getCurrentUser();
         setIsAuthenticated(true);
-      } catch {
+      } catch (error) {
+        console.log('认证检查失败，需要登录');
         setIsAuthenticated(false);
       }
     };

@@ -25,6 +25,9 @@ import type {
   GenerateOutlineResponse,
   Settings,
   SettingsUpdate,
+  ApiConfig,
+  ApiConfigCreate,
+  ApiConfigUpdate,
 } from '../types';
 
 const api = axios.create({
@@ -69,8 +72,11 @@ api.interceptors.response.use(
           errorMessage = '未授权，请先登录';
           // 清除过期的令牌
           localStorage.removeItem('access_token');
-          if (window.location.pathname !== '/login') {
-            window.location.href = '/login';
+          // 只有在非登录页面且当前不在跳转过程中时才重定向
+          if (window.location.pathname !== '/login' && window.location.pathname !== '/auth/callback') {
+            // 保存当前路径用于登录后返回
+            const currentPath = window.location.pathname + window.location.search;
+            window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`;
           }
           break;
         case 403:
@@ -146,6 +152,26 @@ export const settingsApi = {
   
   getAvailableModels: (params: { api_key: string; api_base_url: string; provider: string }) =>
     api.get<unknown, { provider: string; models: Array<{ value: string; label: string; description: string }>; count?: number }>('/settings/models', { params }),
+};
+
+export const apiConfigApi = {
+  getApiConfigs: () => api.get<unknown, ApiConfig[]>('/api-configs'),
+  
+  getDefaultApiConfig: () => api.get<unknown, ApiConfig>('/api-configs/default'),
+  
+  getApiConfig: (id: string) => api.get<unknown, ApiConfig>(`/api-configs/${id}`),
+  
+  createApiConfig: (data: ApiConfigCreate) => api.post<unknown, ApiConfig>('/api-configs', data),
+  
+  updateApiConfig: (id: string, data: ApiConfigUpdate) =>
+    api.put<unknown, ApiConfig>(`/api-configs/${id}`, data),
+  
+  deleteApiConfig: (id: string) => api.delete(`/api-configs/${id}`),
+  
+  setDefaultApiConfig: (id: string) => api.post(`/api-configs/${id}/set-default`),
+  
+  refreshModels: (data: { api_key: string; api_base_url: string; api_provider: string }) =>
+    api.post<unknown, { provider: string; models: string[]; count: number }>('/api-configs/refresh-models', data),
 };
 
 export const projectApi = {
