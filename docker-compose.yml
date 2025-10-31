@@ -1,0 +1,50 @@
+services:
+  ai-story:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ai-story-creator:latest
+    container_name: ai-story-creator
+    ports:
+      - "8000:8000"
+    volumes:
+      # 持久化数据库和日志
+      - ./data:/app/data
+      - ./logs:/app/logs
+      # 挂载环境变量文件（可选）
+      - ./.env:/app/.env:ro
+    environment:
+      # 应用配置
+      - APP_NAME=AI Story Creator
+      - APP_VERSION=1.0.0
+      - APP_HOST=0.0.0.0
+      - APP_PORT=8000
+      - DEBUG=false
+      
+      # 重要：环境变量会从 .env 文件自动加载
+      # 也可以在这里显式设置，优先级：此处设置 > .env 文件
+      
+      # AI服务配置（建议在 .env 文件中设置）
+      # - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # - GEMINI_API_KEY=${GEMINI_API_KEY}
+      # - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      # - DEFAULT_AI_PROVIDER=${DEFAULT_AI_PROVIDER:-gemini}
+      # - DEFAULT_MODEL=${DEFAULT_MODEL:-gemini-2.5-flash}
+      
+      # LinuxDO OAuth配置（⚠️ 必须设置正确的回调地址）
+      # - LINUXDO_CLIENT_ID=${LINUXDO_CLIENT_ID}
+      # - LINUXDO_CLIENT_SECRET=${LINUXDO_CLIENT_SECRET}
+      # - LINUXDO_REDIRECT_URI=${LINUXDO_REDIRECT_URI}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - ai-story-network
+
+networks:
+  ai-story-network:
+    driver: bridge
