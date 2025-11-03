@@ -45,7 +45,7 @@ RUN pip install --no-cache-dir -r requirements.txt -i https://mirrors.aliyun.com
 
 # 强制不使用缓存：添加时间戳作为构建参数
 ARG BUILD_DATE
-ARG CACHEBUST=1.0.0
+ARG CACHEBUST=1
 
 # 复制后端代码（确保获取最新版本）
 COPY backend/ ./

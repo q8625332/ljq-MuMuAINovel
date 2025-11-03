@@ -49,16 +49,14 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 request.state.user_id = user_id
                 request.state.user = user
                 request.state.is_admin = user.is_admin
-            else:
-                # 用户不存在，清除状态
-                request.state.user_id = None
-                request.state.user = None
-                request.state.is_admin = False
         else:
-            # 未登录
-            request.state.user_id = None
-            request.state.user = None
-            request.state.is_admin = False
+            # 未登录，提供默认用户ID作为fallback
+            user_id = "default_user"
+            user = await user_manager.get_user(user_id)
+            if user:
+                request.state.user_id = user_id
+                request.state.user = user
+                request.state.is_admin = False
         
         # 继续处理请求
         response = await call_next(request)

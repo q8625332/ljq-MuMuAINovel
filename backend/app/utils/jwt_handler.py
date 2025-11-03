@@ -52,13 +52,24 @@ def verify_token(token: str) -> Optional[str]:
     Returns:
         用户ID，如果令牌无效则返回None
     """
+    if not token:
+        logger.warning("JWT令牌为空")
+        return None
+        
     try:
+        # 记录使用的密钥信息（不记录实际密钥）
+        key_source = "LOCAL_AUTH_PASSWORD" if settings.LOCAL_AUTH_PASSWORD else "默认密钥"
+        logger.debug(f"使用 {key_source} 验证JWT令牌")
+        
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: str = payload.get("sub")
         if user_id is None:
             logger.warning("JWT令牌中没有用户ID")
             return None
+        
+        logger.debug(f"JWT令牌验证成功，用户ID: {user_id}")
         return user_id
     except JWTError as e:
         logger.warning(f"JWT令牌验证失败: {e}")
+        logger.debug(f"使用的密钥来源: {'LOCAL_AUTH_PASSWORD' if settings.LOCAL_AUTH_PASSWORD else '默认密钥'}")
         return None

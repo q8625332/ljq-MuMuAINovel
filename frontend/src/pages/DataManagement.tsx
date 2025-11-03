@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, Button, Space, Typography, Alert, Divider, Upload, message, Modal, Descriptions, Statistic, Row, Col } from 'antd';
 import { DownloadOutlined, UploadOutlined, InfoCircleOutlined, ExclamationCircleOutlined, CloudDownloadOutlined, DatabaseOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
-import axios from 'axios';
+import api from '../services/api';
 
 const { Title, Text, Paragraph } = Typography;
 const { confirm } = Modal;
@@ -33,8 +33,8 @@ const DataManagement: React.FC = () => {
   const fetchExportInfo = async () => {
     setInfoLoading(true);
     try {
-      const response = await axios.get('/api/export-info');
-      setExportInfo(response.data);
+      const response: any = await api.get('/export-info');
+      setExportInfo(response);
     } catch (error: any) {
       message.error(error.response?.data?.detail || '获取数据统计失败');
     } finally {
@@ -50,12 +50,14 @@ const DataManagement: React.FC = () => {
   const handleExport = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('/api/export-data', {
-        responseType: 'blob', // 重要：指定响应类型为blob
+      const token = localStorage.getItem('access_token');
+      const response: any = await api.get('/export-data', {
+        responseType: 'blob',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 
       // 从响应头获取文件名
-      const contentDisposition = response.headers['content-disposition'];
+      const contentDisposition = response.headers?.['content-disposition'];
       let filename = 'mumuai_backup.json';
       if (contentDisposition) {
         const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(contentDisposition);
@@ -65,7 +67,8 @@ const DataManagement: React.FC = () => {
       }
 
       // 创建下载链接
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const blob = response instanceof Blob ? response : new Blob([response]);
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', filename);
@@ -82,20 +85,20 @@ const DataManagement: React.FC = () => {
     }
   };
 
-  // 导入数据（追加模式）
+  // 导入数据
   const handleImport = async (file: File, replace: boolean = false) => {
     setLoading(true);
     const formData = new FormData();
     formData.append('file', file);
 
     try {
-      const response = await axios.post(`/api/import-data?replace=${replace}`, formData, {
+      const response: any = await api.post(`/import-data?replace=${replace}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      message.success(`数据导入成功！(${response.data.mode})`);
+      message.success(`数据导入成功！(${response.mode})`);
       
       // 刷新统计信息
       await fetchExportInfo();
@@ -368,23 +371,23 @@ const DataManagement: React.FC = () => {
         <Title level={5}>导入模式说明</Title>
         <Paragraph>
           <Text strong>追加模式（推荐）：</Text>
-          <ul>
-            <li>保留所有现有数据</li>
-            <li>将备份文件的数据添加到数据库中</li>
-            <li>适合恢复部分删除的数据或合并多个备份</li>
-            <li>注意：重复导入同一文件会导致数据重复</li>
-          </ul>
         </Paragraph>
+        <ul>
+          <li>保留所有现有数据</li>
+          <li>将备份文件的数据添加到数据库中</li>
+          <li>适合恢复部分删除的数据或合并多个备份</li>
+          <li>注意：重复导入同一文件会导致数据重复</li>
+        </ul>
 
         <Paragraph>
           <Text strong type="danger">替换模式（谨慎使用）：</Text>
-          <ul>
-            <li>删除所有现有数据（不可恢复）</li>
-            <li>完全按照备份文件恢复数据</li>
-            <li>适合版本升级后的数据恢复或完全重置</li>
-            <li>强烈建议在使用前先导出当前数据</li>
-          </ul>
         </Paragraph>
+        <ul>
+          <li>删除所有现有数据（不可恢复）</li>
+          <li>完全按照备份文件恢复数据</li>
+          <li>适合版本升级后的数据恢复或完全重置</li>
+          <li>强烈建议在使用前先导出当前数据</li>
+        </ul>
 
         <Alert
           message="数据安全提示"

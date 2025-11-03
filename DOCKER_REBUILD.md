@@ -98,6 +98,28 @@ docker-compose logs -f backend
 - ✅ `backend/app/api/api_configs.py` 第 8 行：已删除错误的 `get_current_user` 导入
 - ✅ 所有 API 端点已改用硬编码 `user_id = "default_user"`
 - ✅ `Dockerfile` 已添加缓存破坏机制
+- ✅ JWT 认证日志增强：`backend/app/utils/jwt_handler.py` 已添加更详细的日志记录
+
+## JWT 认证配置说明
+
+⚠️ **重要：JWT 认证依赖于 `LOCAL_AUTH_PASSWORD` 环境变量**
+
+1. **JWT 密钥来源**
+   - JWT 令牌的签名密钥来自 `LOCAL_AUTH_PASSWORD` 环境变量
+   - 如果未设置，将使用默认密钥 `"your-secret-key-change-this-in-production"`
+
+2. **部署时必须设置 `LOCAL_AUTH_PASSWORD`**
+   - 在 Hugging Face Spaces 的 "Settings" -> "Repository secrets" 中添加：
+     - Name: `LOCAL_AUTH_PASSWORD`
+     - Value: 一个强密码（例如：`ljq` 或其他随机字符串）
+   - 在 Docker Compose 中，确保 `.env` 文件包含：
+     ```
+     LOCAL_AUTH_PASSWORD=your-strong-password-here
+     ```
+
+3. **常见问题**
+   - **401 Unauthorized 错误**：通常是因为 `LOCAL_AUTH_PASSWORD` 未设置或前后端不一致
+   - **日志查看**：检查容器日志中的 "JWT令牌验证失败" 消息，会显示使用的密钥来源
 
 ## 常见问题
 

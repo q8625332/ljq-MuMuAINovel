@@ -133,13 +133,21 @@ export class SSEPostClient {
       try {
         this.abortController = new AbortController();
 
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        };
+
+        const token = localStorage.getItem('access_token');
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const response = await fetch(this.url, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers,
           body: JSON.stringify(this.data),
           signal: this.abortController.signal,
+          credentials: 'include',
         });
 
         if (!response.ok) {

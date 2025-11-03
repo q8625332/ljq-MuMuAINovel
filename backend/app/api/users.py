@@ -5,14 +5,35 @@ from fastapi import APIRouter, HTTPException, Request, Depends
 from pydantic import BaseModel
 from typing import List, Optional
 from app.user_manager import user_manager, User
+from app.logger import get_logger
 
 router = APIRouter(prefix="/users", tags=["用户管理"])
+logger = get_logger(__name__)
 
 
 def require_login(request: Request):
     """依赖：要求用户已登录"""
+    # 详细日志记录
+    logger.info(f"🔍 require_login 检查 - URL: {request.url.path}")
+    logger.info(f"  - hasattr(request.state, 'user'): {hasattr(request.state, 'user')}")
+    if hasattr(request.state, "user"):
+        logger.info(f"  - request.state.user: {request.state.user}")
+    if hasattr(request.state, "user_id"):
+        logger.info(f"  - request.state.user_id: {request.state.user_id if hasattr(request.state, 'user_id') else 'None'}")
+    
+    # 检查请求头
+    auth_header = request.headers.get("Authorization")
+    logger.info(f"  - Authorization header: {auth_header[:30] if auth_header else 'None'}...")
+    
+    # 检查Cookie
+    user_id_cookie = request.cookies.get("user_id")
+    logger.info(f"  - user_id cookie: {user_id_cookie}")
+    
     if not hasattr(request.state, "user") or not request.state.user:
+        logger.warning(f"❌ 认证失败: request.state.user 不存在或为空")
         raise HTTPException(status_code=401, detail="需要登录")
+    
+    logger.info(f"✅ 认证成功: {request.state.user}")
     return request.state.user
 
 
